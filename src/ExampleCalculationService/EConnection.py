@@ -31,7 +31,6 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
 
         calculation_information = HelicsCalculationInformation(
             time_period_in_seconds=edemand_period_in_seconds,
-            time_request_type=TimeRequestType.PERIOD,
             offset=0, 
             uninterruptible=False, 
             wait_for_current_time_update=False, 
@@ -51,7 +50,7 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
 
         edemand_up_to_next_day_period_in_seconds = 900
 
-        calculation_information_schedule = HelicsCalculationInformation(edemand_up_to_next_day_period_in_seconds, TimeRequestType.PERIOD, 0, False, False, True, "predict_demand_up_to_next_day", [], publication_values, self.predict_demand_up_to_next_day)
+        calculation_information_schedule = HelicsCalculationInformation(edemand_up_to_next_day_period_in_seconds, 0, False, False, True, "predict_demand_up_to_next_day", [], publication_values, self.predict_demand_up_to_next_day)
         self.add_calculation(calculation_information_schedule)
 
     def init_calculation_service(self, energy_system: esdl.EnergySystem):
