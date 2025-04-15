@@ -5,8 +5,8 @@ FROM python:3.9.0
 RUN mkdir /app/
 WORKDIR /app
 
-COPY src/ExampleCalculationService ./
+COPY src/EDemandService ./
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-ENTRYPOINT python3 EConnection.py
+ENTRYPOINT python3 EDemandService.py

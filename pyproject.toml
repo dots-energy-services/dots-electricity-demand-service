@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ExampleCalculationService"
+name = "EDemandService"
 version = "0.0.1"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Gijs Verhoeven", email="g.verhoenven.1@tue.nl" },
 ]
-description = "A small example package"
+description = "A DOTs calculation service publishing the active and reactive power demand of a building."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
