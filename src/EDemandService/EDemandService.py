@@ -71,7 +71,7 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
                         "active_power_profile": active_power_profile
                     }
                     power_profile_df = pd.DataFrame(power_profile)
-                    power_profile_df.set_index("to_times", inplace=True)
+                    power_profile_df.set_index("from_times", inplace=True)
                     self.active_power_profiles[esdl_id] = power_profile_df
                     self.powerfactor[esdl_id] = edemand_object.powerFactor
 
