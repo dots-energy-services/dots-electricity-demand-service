@@ -79,11 +79,11 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
 
         assert (self.powerfactor[esdl_id] > 0.0) and (self.powerfactor[esdl_id] <= 1.0), "provide power factor between 0 and 1"
         predicted_active_power = self.active_power_profiles[esdl_id][simulation_time:simulation_time + timedelta(seconds=self.window_size_in_seconds - 1)]["active_power_profile"].tolist()
-        LOGGER.debug('simulation_time:', simulation_time)
-        LOGGER.debug('predicted_active_power:', predicted_active_power)
+        LOGGER.debug(f'simulation_time: {simulation_time}' )
+        LOGGER.debug(f'predicted_active_power: {predicted_active_power}' )
         predicted_reactive_power = [self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id]) for active_power in
                                     predicted_active_power]
-        LOGGER.debug('predicted_reactive_power:', predicted_reactive_power)
+        LOGGER.debug(f'predicted_reactive_power: {predicted_reactive_power}')
 
         ret_val = {}
         ret_val["active_power"] = predicted_active_power
