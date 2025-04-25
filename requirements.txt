@@ -1,2 +1,3 @@
-helics==3.4.0
-dots_infrastructure==0.1.6
+helics==3.6.1
+dots_infrastructure==0.4.8
+pandas==2.2.3 
