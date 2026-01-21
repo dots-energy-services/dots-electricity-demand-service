@@ -12,6 +12,14 @@ Send the values of the electricity demand profile for the coming 12 hours.
 |-----------------|----------------------|-----------------|------------------------|
 |active_power|VECTOR|W|The active power demand as vector of floats for the next 12 hours in watts.|
 |reactive_power|VECTOR|W|The reactive power demand as vector of floats for the next 12 hours in watts.|
+### current demand 
+
+Send the current values of the electricity demand profile for the coming 15 minutes.
+#### Output values
+|Name             |data_type             |unit             |description             |
+|-----------------|----------------------|-----------------|------------------------|
+|active_power|DOUBLE|W|The active power demand as vector of floats for the next 15 minutes in watts.|
+|reactive_power|DOUBLE|W|The reactive power demand as vector of floats for the next 15 minutes in watts.|
 
 ### Relevant links
 |Link             |description             |

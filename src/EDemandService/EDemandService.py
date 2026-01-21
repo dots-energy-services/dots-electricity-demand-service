@@ -47,6 +47,7 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
     def init_calculation_service(self, energy_system: esdl.EnergySystem):
         # set windowsizes for different calculations
         self.window_size_in_seconds = 43200
+        self.current_demand_period_seconds = 900
 
         self.active_power_profiles: dict[EsdlId, list] = {}
         self.powerfactor: dict[EsdlId, float] = {}
@@ -88,6 +89,15 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         ret_val = {}
         ret_val["active_power"] = predicted_active_power
         ret_val["reactive_power"] = predicted_reactive_power
+        return ret_val
+    
+    def current_demand(self, param_dict : dict, simulation_time : datetime, time_step_number : TimeStepInformation, esdl_id : EsdlId, energy_system : EnergySystem):
+        assert (self.powerfactor[esdl_id] > 0.0) and (self.powerfactor[esdl_id] <= 1.0), "provide power factor between 0 and 1"
+        active_power = self.active_power_profiles[esdl_id][simulation_time:simulation_time + timedelta(seconds=self.current_demand_period_seconds - 1)]["active_power_profile"].tolist()[0]
+        reactive_power = self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id])
+        ret_val = {}
+        ret_val["active_power"] = active_power
+        ret_val["reactive_power"] = reactive_power
         return ret_val
 
     @staticmethod

@@ -1,0 +1,56 @@
+{
+    "name": "Electricity demand service",
+    "esdl_type" : "ElectricityDemand",
+    "description" : "This calculation service publishes values for an electricity demand profile. The values of the profile should be specified in the ESDL file.",
+    "relevant_links" : [
+        {
+            "name" : "EnvironmentalProfiles",
+            "url" : "https://energytransition.github.io/#router/doc-content/687474703a2f2f7777772e746e6f2e6e6c2f6573646c/EnvironmentalProfiles.html",
+            "description" : "Details on the EnvironmentalProfiles esdl type"
+        }
+    ],
+    "calculations" : [
+        {
+            "name": "predict demand",
+            "description" : "Send the values of the electricity demand profile for the coming 12 hours.",
+            "time_period_in_seconds" : 900,
+            "offset_in_seconds" : 0,
+            "inputs" : [ ],
+            "outputs" : [
+                {
+                    "name" : "active_power",
+                    "data_type" : "VECTOR",
+                    "description" : "The active power demand as vector of floats for the next 12 hours in watts.",
+                    "unit" : "W"
+                },
+                {
+                    "name" : "reactive_power",
+                    "data_type" : "VECTOR",
+                    "description" : "The reactive power demand as vector of floats for the next 12 hours in watts.",
+                    "unit" : "W"
+                }
+            ]
+        },
+        {
+            "name": "current demand",
+            "description" : "Send the current values of the electricity demand profile for the coming 15 minutes.",
+            "time_period_in_seconds" : 900,
+            "offset_in_seconds" : 0,
+            "inputs" : [ ],
+            "outputs" : [
+                {
+                    "name" : "active_power",
+                    "data_type" : "DOUBLE",
+                    "description" : "The active power demand as vector of floats for the next 15 minutes in watts.",
+                    "unit" : "W"
+                },
+                {
+                    "name" : "reactive_power",
+                    "data_type" : "DOUBLE",
+                    "description" : "The reactive power demand as vector of floats for the next 15 minutes in watts.",
+                    "unit" : "W"
+                }
+            ]
+        }
+    ]
+}
