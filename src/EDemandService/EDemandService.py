@@ -43,6 +43,32 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         )
         self.add_calculation(calculation_information)
 
+        publication_values_current_demand = [
+            PublicationDescription(global_flag=True, 
+                                   esdl_type="ElectricityDemand",
+                                   output_name="current_active_power",
+                                   output_unit="W", 
+                                   data_type=h.HelicsDataType.DOUBLE),
+            PublicationDescription(global_flag=True,
+                                   esdl_type="ElectricityDemand",
+                                   output_name="current_reactive_power",
+                                   output_unit="VAr",
+                                   data_type=h.HelicsDataType.DOUBLE)
+        ]
+
+        calculation_information_current_demand = HelicsCalculationInformation(
+            time_period_in_seconds=edemand_period_in_seconds,
+            offset=0, 
+            uninterruptible=False, 
+            wait_for_current_time_update=False, 
+            terminate_on_error=True, 
+            calculation_name="current_demand",
+            inputs=[],
+            outputs=publication_values_current_demand, 
+            calculation_function=self.current_demand
+        )
+        self.add_calculation(calculation_information_current_demand)
+
 
     def init_calculation_service(self, energy_system: esdl.EnergySystem):
         # set windowsizes for different calculations
