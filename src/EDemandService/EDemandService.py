@@ -96,8 +96,8 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         active_power = self.active_power_profiles[esdl_id][simulation_time:simulation_time + timedelta(seconds=self.current_demand_period_seconds - 1)]["active_power_profile"].tolist()[0]
         reactive_power = self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id])
         ret_val = {}
-        ret_val["active_power"] = active_power
-        ret_val["reactive_power"] = reactive_power
+        ret_val["current_active_power"] = active_power
+        ret_val["current_reactive_power"] = reactive_power
         return ret_val
 
     @staticmethod

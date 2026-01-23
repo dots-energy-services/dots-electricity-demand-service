@@ -18,8 +18,8 @@ Send the current values of the electricity demand profile for the coming 15 minu
 #### Output values
 |Name             |data_type             |unit             |description             |
 |-----------------|----------------------|-----------------|------------------------|
-|active_power|DOUBLE|W|The active power demand as vector of floats for the next 15 minutes in watts.|
-|reactive_power|DOUBLE|W|The reactive power demand as vector of floats for the next 15 minutes in watts.|
+|current_active_power|DOUBLE|W|The active power demand as vector of floats for the next 15 minutes in watts.|
+|current_reactive_power|DOUBLE|W|The reactive power demand as vector of floats for the next 15 minutes in watts.|
 
 ### Relevant links
 |Link             |description             |

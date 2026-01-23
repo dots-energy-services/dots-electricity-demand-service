@@ -55,8 +55,8 @@ class Test(unittest.TestCase):
         expected_active_power = 108.0
         pf = 0.95
         expected_reactive_power_profile = np.sqrt(1-pf**2)/pf * expected_active_power
-        self.assertEqual(expected_active_power, ret_val["active_power"])
-        self.assertEqual(expected_reactive_power_profile, ret_val["reactive_power"])
+        self.assertEqual(expected_active_power, ret_val["current_active_power"])
+        self.assertEqual(expected_reactive_power_profile, ret_val["current_reactive_power"])
 
 if __name__ == '__main__':
     unittest.main()

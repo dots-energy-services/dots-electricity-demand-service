@@ -39,13 +39,13 @@
             "inputs" : [ ],
             "outputs" : [
                 {
-                    "name" : "active_power",
+                    "name" : "current_active_power",
                     "data_type" : "DOUBLE",
                     "description" : "The active power demand as vector of floats for the next 15 minutes in watts.",
                     "unit" : "W"
                 },
                 {
-                    "name" : "reactive_power",
+                    "name" : "current_reactive_power",
                     "data_type" : "DOUBLE",
                     "description" : "The reactive power demand as vector of floats for the next 15 minutes in watts.",
                     "unit" : "W"
