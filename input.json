@@ -48,7 +48,7 @@
                     "name" : "current_reactive_power",
                     "data_type" : "DOUBLE",
                     "description" : "The reactive power demand as vector of floats for the next 15 minutes in watts.",
-                    "unit" : "W"
+                    "unit" : "VAr"
                 }
             ]
         }

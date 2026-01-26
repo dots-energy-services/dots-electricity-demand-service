@@ -124,6 +124,8 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         ret_val = {}
         ret_val["current_active_power"] = active_power
         ret_val["current_reactive_power"] = reactive_power
+        self.influx_connector.set_time_step_data_point(esdl_id, "current_active_power", simulation_time, active_power)
+        self.influx_connector.set_time_step_data_point(esdl_id, "current_reactive_power", simulation_time, reactive_power)
         return ret_val
 
     @staticmethod
