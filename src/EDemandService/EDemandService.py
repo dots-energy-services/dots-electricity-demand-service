@@ -43,10 +43,37 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         )
         self.add_calculation(calculation_information)
 
+        publication_values_current_demand = [
+            PublicationDescription(global_flag=True, 
+                                   esdl_type="ElectricityDemand",
+                                   output_name="current_active_power",
+                                   output_unit="W", 
+                                   data_type=h.HelicsDataType.DOUBLE),
+            PublicationDescription(global_flag=True,
+                                   esdl_type="ElectricityDemand",
+                                   output_name="current_reactive_power",
+                                   output_unit="VAr",
+                                   data_type=h.HelicsDataType.DOUBLE)
+        ]
+
+        calculation_information_current_demand = HelicsCalculationInformation(
+            time_period_in_seconds=edemand_period_in_seconds,
+            offset=0, 
+            uninterruptible=False, 
+            wait_for_current_time_update=False, 
+            terminate_on_error=True, 
+            calculation_name="current_demand",
+            inputs=[],
+            outputs=publication_values_current_demand, 
+            calculation_function=self.current_demand
+        )
+        self.add_calculation(calculation_information_current_demand)
+
 
     def init_calculation_service(self, energy_system: esdl.EnergySystem):
         # set windowsizes for different calculations
         self.window_size_in_seconds = 43200
+        self.current_demand_period_seconds = 900
 
         self.active_power_profiles: dict[EsdlId, list] = {}
         self.powerfactor: dict[EsdlId, float] = {}
@@ -88,6 +115,17 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         ret_val = {}
         ret_val["active_power"] = predicted_active_power
         ret_val["reactive_power"] = predicted_reactive_power
+        return ret_val
+    
+    def current_demand(self, param_dict : dict, simulation_time : datetime, time_step_number : TimeStepInformation, esdl_id : EsdlId, energy_system : EnergySystem):
+        assert (self.powerfactor[esdl_id] > 0.0) and (self.powerfactor[esdl_id] <= 1.0), "provide power factor between 0 and 1"
+        active_power = self.active_power_profiles[esdl_id][simulation_time:simulation_time + timedelta(seconds=self.current_demand_period_seconds - 1)]["active_power_profile"].tolist()[0]
+        reactive_power = self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id])
+        ret_val = {}
+        ret_val["current_active_power"] = active_power
+        ret_val["current_reactive_power"] = reactive_power
+        self.influx_connector.set_time_step_data_point(esdl_id, "current_active_power", simulation_time, active_power)
+        self.influx_connector.set_time_step_data_point(esdl_id, "current_reactive_power", simulation_time, reactive_power)
         return ret_val
 
     @staticmethod

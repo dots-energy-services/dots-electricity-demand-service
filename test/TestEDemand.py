@@ -41,5 +41,22 @@ class Test(unittest.TestCase):
         self.assertListEqual(expected_active_power_profile, ret_val["active_power"])
         self.assertListEqual(expected_reactive_power_profile, ret_val["reactive_power"])
 
+    def test_current_demand(self):
+
+        # Arrange
+        service = CalculationServiceElectricityDemand()
+        service.influx_connector = InfluxDBMock()
+        service.init_calculation_service(self.energy_system)
+
+        # # Execute
+        ret_val = service.current_demand({}, datetime(2020,1,14,0,0), TimeStepInformation(1,2), "25d212e5-ca5f-4a3d-9fb1-a5f024b2460a", self.energy_system)
+
+        # Assert
+        expected_active_power = 108.0
+        pf = 0.95
+        expected_reactive_power_profile = np.sqrt(1-pf**2)/pf * expected_active_power
+        self.assertEqual(expected_active_power, ret_val["current_active_power"])
+        self.assertEqual(expected_reactive_power_profile, ret_val["current_reactive_power"])
+
 if __name__ == '__main__':
     unittest.main()
