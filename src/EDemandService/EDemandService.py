@@ -77,30 +77,28 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
 
         self.active_power_profiles: dict[EsdlId, list] = {}
         self.powerfactor: dict[EsdlId, float] = {}
+        for obj in energy_system.eAllContents():
+            if hasattr(obj, "id") and obj.id in self.simulator_configuration.esdl_ids:
+                esdl_id = obj.id
+                edemand_object = obj
+                profile = edemand_object.port[0].profile[0] # get profile from the first port
+                active_power_profile = []
+                active_power_profile_from_times = []
+                active_power_profile_to_times = []
+                for el in profile.element:
+                    active_power_profile.append(el.value)
+                    active_power_profile_from_times.append(el.from_)
+                    active_power_profile_to_times.append(el.to)
 
-        for esdl_id in self.simulator_configuration.esdl_ids:
-            # Get profiles from the ESDL
-            for obj in energy_system.eAllContents():
-                if hasattr(obj, "id") and obj.id == esdl_id:
-                    edemand_object = obj
-                    profile = edemand_object.port[0].profile[0] # get profile from the first port
-                    active_power_profile = []
-                    active_power_profile_from_times = []
-                    active_power_profile_to_times = []
-                    for el in profile.element:
-                        active_power_profile.append(el.value)
-                        active_power_profile_from_times.append(el.from_)
-                        active_power_profile_to_times.append(el.to)
-
-                    power_profile = {
-                        "from_times": active_power_profile_from_times,
-                        "to_times": active_power_profile_to_times,
-                        "active_power_profile": active_power_profile
-                    }
-                    power_profile_df = pd.DataFrame(power_profile)
-                    power_profile_df.set_index("from_times", inplace=True)
-                    self.active_power_profiles[esdl_id] = power_profile_df
-                    self.powerfactor[esdl_id] = edemand_object.powerFactor
+                power_profile = {
+                    "from_times": active_power_profile_from_times,
+                    "to_times": active_power_profile_to_times,
+                    "active_power_profile": active_power_profile
+                }
+                power_profile_df = pd.DataFrame(power_profile)
+                power_profile_df.set_index("from_times", inplace=True)
+                self.active_power_profiles[esdl_id] = power_profile_df
+                self.powerfactor[esdl_id] = edemand_object.powerFactor
 
     def predict_demand(self, param_dict : dict, simulation_time : datetime, time_step_number : TimeStepInformation, esdl_id : EsdlId, energy_system : EnergySystem):
 
