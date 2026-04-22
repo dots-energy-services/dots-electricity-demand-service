@@ -7,6 +7,6 @@ WORKDIR /app
 
 COPY src/EDemandService ./
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --extra-index-url https://test.pypi.org/simple/
 
 ENTRYPOINT ["python3", "EDemandService.py"]
