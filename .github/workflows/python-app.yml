@@ -30,7 +30,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Install
       run: |
-        pip install -e ./
+        pip install -e ./ --extra-index-url https://test.pypi.org/simple/
     - name: Test with unittest
       run: |
         cd test
