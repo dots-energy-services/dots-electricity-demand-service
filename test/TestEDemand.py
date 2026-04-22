@@ -14,7 +14,7 @@ START_DATE_TIME = datetime(2024, 1, 1, 0, 0, 0)
 SIMULATION_DURATION_IN_SECONDS = 960
 
 def simulator_environment_e_demand():
-    return SimulatorConfiguration("ElectricityDemand", ["25d212e5-ca5f-4a3d-9fb1-a5f024b2460a"], "Mock-Econnection", "127.0.0.1", BROKER_TEST_PORT, "test-id", SIMULATION_DURATION_IN_SECONDS, START_DATE_TIME, "test-host", "test-port", "test-username", "test-password", "test-database-name", h.HelicsLogLevel.DEBUG, ["PVInstallation", "EConnection"])
+    return SimulatorConfiguration("ElectricityDemand", ["25d212e5-ca5f-4a3d-9fb1-a5f024b2460a"], "Mock-Econnection", "127.0.0.1", BROKER_TEST_PORT, BROKER_TEST_PORT, "test-id", SIMULATION_DURATION_IN_SECONDS, START_DATE_TIME, "test-host", "test-port", "test-username", "test-password", "test-database-name", h.HelicsLogLevel.DEBUG, ["PVInstallation", "EConnection"])
 
 class Test(unittest.TestCase):
 
