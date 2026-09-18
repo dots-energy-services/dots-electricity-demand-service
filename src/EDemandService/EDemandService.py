@@ -96,8 +96,10 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
                     parsed_profile = ParsedTimeSeriesProfile(profile)
 
                 self.active_power_profiles[obj.id] = ProfileMetaData(parsed_profile, profile.profileQuantityAndUnit)
-
-                self.powerfactor[esdl_id] = edemand_object.powerFactor
+                if edemand_object.powerFactor == None:
+                    self.powerfactor[esdl_id] = 0.95
+                else:
+                    self.powerfactor[esdl_id] = edemand_object.powerFactor
 
     def predict_demand(self, param_dict : dict, simulation_time : datetime, time_step_number : TimeStepInformation, esdl_id : EsdlId, energy_system : EnergySystem):
 
@@ -106,7 +108,7 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         to_date = simulation_time + timedelta(seconds=self.window_size_in_seconds - 1)
         profile_meta_data = self.active_power_profiles[esdl_id]
         predicted_active_power = profile_meta_data.profile.get_data(from_date, to_date)
-        if profile_meta_data.unit.multiplier == MultiplierEnum.from_string('KILO'):
+        if profile_meta_data.unit is not None and profile_meta_data.unit.multiplier == MultiplierEnum.from_string('KILO'):
             predicted_active_power = [1000 * val for val in predicted_active_power]
 
         LOGGER.debug(f'simulation_time: {simulation_time}' )
@@ -126,7 +128,7 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         to_date = simulation_time + timedelta(seconds=self.current_demand_period_seconds - 1)
         profile_meta_data = self.active_power_profiles[esdl_id]
         active_power = profile_meta_data.profile.get_data(from_date, to_date)[0]
-        if profile_meta_data.unit.multiplier == MultiplierEnum.from_string('KILO'):
+        if profile_meta_data.unit is not None and profile_meta_data.unit.multiplier == MultiplierEnum.from_string('KILO'):
             active_power = 1000 * active_power
 
         reactive_power = self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id])
