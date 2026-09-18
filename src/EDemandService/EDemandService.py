@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
-from esdl import esdl
+from dataclasses import dataclass
+from dots_infrastructure.EsdlProfileParsingClasses import ParsedDateTimeProfile, ParsedStaticProfile, ParsedTimeSeriesProfile
+from esdl import DateTimeProfile, MultiplierEnum, QuantityAndUnitType, TimeSeriesProfile, esdl
 import helics as h
 from dots_infrastructure.DataClasses import EsdlId, HelicsCalculationInformation, PublicationDescription, TimeStepInformation
 from dots_infrastructure.HelicsFederateHelpers import HelicsSimulationExecutor
 from dots_infrastructure.Logger import LOGGER
 from esdl import EnergySystem
 
-import pandas as pd
 import numpy as np
+
+@dataclass
+class ProfileMetaData:
+    profile : ParsedStaticProfile
+    unit : QuantityAndUnitType
+
 
 class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
 
@@ -75,35 +82,35 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
         self.window_size_in_seconds = 43200
         self.current_demand_period_seconds = 900
 
-        self.active_power_profiles: dict[EsdlId, list] = {}
+        self.active_power_profiles: dict[EsdlId, ProfileMetaData] = {}
         self.powerfactor: dict[EsdlId, float] = {}
         for obj in energy_system.eAllContents():
             if hasattr(obj, "id") and obj.id in self.simulator_configuration.esdl_ids:
                 esdl_id = obj.id
                 edemand_object = obj
-                profile = edemand_object.port[0].profile[0] # get profile from the first port
-                active_power_profile = []
-                active_power_profile_from_times = []
-                active_power_profile_to_times = []
-                for el in profile.element:
-                    active_power_profile.append(el.value)
-                    active_power_profile_from_times.append(el.from_)
-                    active_power_profile_to_times.append(el.to)
+                profile_port = next(port for port in edemand_object.port if len(port.profile) > 0)
+                profile = profile_port.profile[0]
+                if isinstance(profile, DateTimeProfile):
+                    parsed_profile = ParsedDateTimeProfile(profile)
+                elif isinstance(profile, TimeSeriesProfile):
+                    parsed_profile = ParsedTimeSeriesProfile(profile)
 
-                power_profile = {
-                    "from_times": active_power_profile_from_times,
-                    "to_times": active_power_profile_to_times,
-                    "active_power_profile": active_power_profile
-                }
-                power_profile_df = pd.DataFrame(power_profile)
-                power_profile_df.set_index("from_times", inplace=True)
-                self.active_power_profiles[esdl_id] = power_profile_df
-                self.powerfactor[esdl_id] = edemand_object.powerFactor
+                self.active_power_profiles[obj.id] = ProfileMetaData(parsed_profile, profile.profileQuantityAndUnit)
+                if edemand_object.powerFactor == None:
+                    self.powerfactor[esdl_id] = 0.95
+                else:
+                    self.powerfactor[esdl_id] = edemand_object.powerFactor
 
     def predict_demand(self, param_dict : dict, simulation_time : datetime, time_step_number : TimeStepInformation, esdl_id : EsdlId, energy_system : EnergySystem):
 
         assert (self.powerfactor[esdl_id] > 0.0) and (self.powerfactor[esdl_id] <= 1.0), "provide power factor between 0 and 1"
-        predicted_active_power = self.active_power_profiles[esdl_id][simulation_time:simulation_time + timedelta(seconds=self.window_size_in_seconds - 1)]["active_power_profile"].tolist()
+        from_date = simulation_time
+        to_date = simulation_time + timedelta(seconds=self.window_size_in_seconds - 1)
+        profile_meta_data = self.active_power_profiles[esdl_id]
+        predicted_active_power = profile_meta_data.profile.get_data(from_date, to_date)
+        if profile_meta_data.unit is not None and profile_meta_data.unit.multiplier == MultiplierEnum.from_string('KILO'):
+            predicted_active_power = [1000 * val for val in predicted_active_power]
+
         LOGGER.debug(f'simulation_time: {simulation_time}' )
         LOGGER.debug(f'predicted_active_power: {predicted_active_power}' )
         predicted_reactive_power = [self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id]) for active_power in
@@ -117,7 +124,13 @@ class CalculationServiceElectricityDemand(HelicsSimulationExecutor):
     
     def current_demand(self, param_dict : dict, simulation_time : datetime, time_step_number : TimeStepInformation, esdl_id : EsdlId, energy_system : EnergySystem):
         assert (self.powerfactor[esdl_id] > 0.0) and (self.powerfactor[esdl_id] <= 1.0), "provide power factor between 0 and 1"
-        active_power = self.active_power_profiles[esdl_id][simulation_time:simulation_time + timedelta(seconds=self.current_demand_period_seconds - 1)]["active_power_profile"].tolist()[0]
+        from_date = simulation_time
+        to_date = simulation_time + timedelta(seconds=self.current_demand_period_seconds - 1)
+        profile_meta_data = self.active_power_profiles[esdl_id]
+        active_power = profile_meta_data.profile.get_data(from_date, to_date)[0]
+        if profile_meta_data.unit is not None and profile_meta_data.unit.multiplier == MultiplierEnum.from_string('KILO'):
+            active_power = 1000 * active_power
+
         reactive_power = self.calculate_Q_from_P_and_pf(active_power, self.powerfactor[esdl_id])
         ret_val = {}
         ret_val["current_active_power"] = active_power
